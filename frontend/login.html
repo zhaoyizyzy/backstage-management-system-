@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+        crossorigin="anonymous" />
+</head>
+<body>
+    <div class="container">
+        <form style="width: 500px;margin:50px auto">
+            <div class="form-group">
+              <label for="username">用户名</label>
+              <input type="text" class="form-control" id="username">
+            </div>
+            <div class="form-group">
+              <label for="password">密码</label>
+              <input type="password" class="form-control" id="password">
+            </div>
+            <button type="submit" class="btn btn-primary submit">登录</button>
+          </form>
+    </div>
+
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/jsencrypt/3.0.0-beta.1/jsencrypt.min.js"></script>
+    <script>
+        //进页面要做预登陆
+        let publicKey;
+        window.onload = async ()=>{
+            const res = await ajax("/users/key");
+            publicKey = res.key;
+        }
+
+        $('.submit').on('click',async (e)=>{
+            e.preventDefault();
+            //得到一个加密的实例
+            let encrypt = new JSEncrypt();
+            //将公钥传入
+            console.log(publicKey);
+            encrypt.setPublicKey(publicKey);
+            const userInfo = JSON.stringify({
+                username:$('#username').val(),
+                password:$('#password').val(),
+            });//需要加密的账号密码，对象转成字符串
+            const encryptKey = encrypt.encrypt(userInfo);//使用公钥加密，得到密文
+            console.log(encryptKey);
+            const res = await ajax("/users/login",{
+                info:encryptKey,
+            },"POST");
+            if(res.status===0){
+                location.href = "./index.html";
+            }else{
+                alert(res.msg);
+            }
+        })
+
+        const BASE_URL = "http://localhost:3000";
+
+        //将请求数据封装成promise
+        const ajax = (url, data = {}, method = "GET") => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: BASE_URL + url,
+                    method: method,
+                    data: data,
+                    success(res) {
+                        resolve(res);
+                    },
+                });
+            })
+
+        };
+    </script>
+</body>
+</html>

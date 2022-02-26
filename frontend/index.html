@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+        crossorigin="anonymous" />
+    <style>
+        button {
+            margin-left: 10px;
+        }
+
+        .pagination {
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 搜索表单 -->
+        <div>
+            <form class="form-inline" style="float: left;">
+
+                <div class="form-group mb-2">
+                    <input type="text" class="form-control" id="username" placeholder="请输入姓名">
+                </div>
+                <button type="submit" class="btn btn-primary mb-2 search">查询</button>
+                <button type="reset" class="btn btn-primary mb-2 reset">重置</button>
+            </form>
+            <button type="button" class="btn btn-info" style="float: right;" data-toggle="modal"
+                data-target="#exampleModal" onclick="clear1()">新增</button>
+        </div>
+
+        <!-- Modal 模态框-->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">新增学员</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="name">姓名</label>
+                                <input type="email" class="form-control" id="name">
+                            </div>
+                            <div class="form-group">
+                                <label for="age">年龄</label>
+                                <input type="number" class="form-control" id="age">
+                            </div>
+                            <div class="form-group">
+                                <label for="sex">性别</label>
+                                <select class="form-control" id="sex">
+                                    <option value="1">男</option>
+                                    <option value="0">女</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="hobby">爱好</label>
+                                <input type="text" class="form-control" id="hobby">
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">电话</label>
+                                <input type="number" class="form-control" id="phone">
+                            </div>
+
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="add()">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal 修改模态框2 -->
+        <div class="modal fade" id="exampleModal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">学员信息</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="name">姓名</label>
+                                <input type="email" class="form-control" id="name">
+                            </div>
+                            <div class="form-group">
+                                <label for="age">年龄</label>
+                                <input type="number" class="form-control" id="age">
+                            </div>
+                            <div class="form-group">
+                                <label for="sex">性别</label>
+                                <select class="form-control" id="sex">
+                                    <option value="1">男</option>
+                                    <option value="0">女</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="hobby">爱好</label>
+                                <input type="text" class="form-control" id="hobby">
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">电话</label>
+                                <input type="number" class="form-control" id="phone">
+                            </div>
+
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                            onclick="upDate()">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">姓名</th>
+                    <th scope="col">年龄</th>
+                    <th scope="col">性别</th>
+                    <th scope="col">爱好</th>
+                    <th scope="col">电话</th>
+                    <th scope="col">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <!-- 分页 -->
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+
+            </ul>
+        </nav>
+    </div>
+
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
+
+    <script>
+        const BASE_URL = "http://localhost:3000";
+        let page = 1;
+        let size = 2;
+
+        //将请求数据封装成promise
+        const ajax = (url, data = {}, method = "GET") => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: BASE_URL + url,
+                    method: method,
+                    data: data,
+                    success(res) {
+                        resolve(res);
+                    },
+                });
+            })
+
+        };
+
+        //请求列表
+        const getTableDate = async (data = {}) => {
+            const res = await ajax("/students/list", { ...data, page: page, size: size });
+            if (res.status === 0) {
+                //表格做拼接
+                let str = "";
+                res.result.forEach(ele => {
+                    str += `
+                   <tr>
+                    <th>${ele.name}</th>
+                    <td>${ele.age}</td>
+                    <td>${ele.sex == 1 ? '男' : '女'}</td>
+                    <td>${ele.hobby}</td>
+                    <td>${ele.phone}</td>
+                    <td>
+                        <button type="button" class="btn btn-success" onclick="getOne('${ele._id}')" data-toggle="modal"
+                data-target="#exampleModal1">编辑</button>  
+                        <button type="button" class="btn btn-danger" onclick="del('${ele._id}')">删除</button>
+                    </td>
+                    
+                </tr>
+              `;
+                });
+                $("tbody").html(str);
+
+                //分页做拼接
+                let str2 = `<li class="page-item" onclick="pre()">
+                <a class="page-link" href="#" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>`;
+                const pages = Math.ceil(res.count / size);
+                for (let i = 0; i < pages; i++) {
+                    str2 += `<li class="page-item"><a class="page-link" href="#" onclick="fn(${i + 1})">${i + 1}</a></li>`;
+                }
+                str2 += `<li class="page-item" onclick="nex(${res.count})">
+                <a class="page-link" href="#" aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>`;
+
+                $(".pagination").html(str2);
+
+            }
+        }
+        // 进页面时请求数据
+        window.onload = async () => {
+            getTableDate();
+        };
+
+        // 点击搜索
+        $('.search').on('click', (e) => {
+            e.preventDefault();
+            const name = $("#username").val();
+            page = 1;
+            getTableDate({ name });
+        })
+
+        //重置
+        $('.reset').on('click', (e) => {
+            getTableDate();
+        });
+
+        //上页下页
+        const fn = (i) => {
+            page = i;
+            getTableDate();
+        }
+        const pre = () => {
+            page--;
+            if (page <= 1) {
+                page = 1;
+            }
+            getTableDate();
+        }
+        const nex = (pag) => {
+            page++;
+            if (page >= Math.ceil(pag / size)) {
+                page = Math.ceil(pag / size)
+            }
+            getTableDate();
+        };
+
+        //删除
+        const del = async (id) => {
+            const res = await ajax("/students/del", { id }, "POST");
+
+            if (res.status === 0) {
+                getTableDate();
+            } else {
+                alert(res.msg);
+            }
+        }
+
+        //新增功能
+        const clear1 = () => {
+            $('#name').val('');
+            $('#age').val('');
+            $('#sex').val('');
+            $('#hobby').val('');
+            $('#phone').val('');
+        };
+        const add = async () => {
+            const res = await ajax("/students/add", {
+                name: $('#name').val(),
+                age: $('#age').val(),
+                sex: $('#sex').val(),
+                hobby: $('#hobby').val(),
+                phone: $('#phone').val(),
+            }, "POST");
+            if (res.status === 0) {
+                getTableDate();
+            }
+        }
+
+        //编辑功能
+        //获取单个学员信息
+        var id2;
+        const getOne = async (id) => {
+            const res = await ajax("/students/get", { id: id }, "POST");
+            id2 = res.doc._id;
+            $('#exampleModal1 #name').val(res.doc.name);
+            $('#exampleModal1 #age').val(res.doc.age);
+            $('#exampleModal1 #sex').val(res.doc.sex);
+            $('#exampleModal1 #hobby').val(res.doc.hobby);
+            $('#exampleModal1 #phone').val(res.doc.phone);
+        }
+
+        //确认修改
+        const upDate = async () => {
+            console.log(id2);
+                const res = await ajax("/students/update", {
+                    id: id2,
+                    name: $('#exampleModal1 #name').val(),
+                    age: $('#exampleModal1 #age').val(),
+                    sex: $('#exampleModal1 #sex').val(),
+                    hobby: $('#exampleModal1 #hobby').val(),
+                    phone: $('#exampleModal1 #phone').val(),
+                }, "POST");
+                console.log(res);
+                if (res.status === 0) {
+                    getTableDate();
+                }
+            }
+
+
+
+
+    </script>
+</body>
+
+</html>
